@@ -1,97 +1,109 @@
-shQueue = []
-shRunning = []
+class SmartHitter{
 
-isRunning = function(name){
-	console.log('isRunning');
-	var response = false;
-	for(var i = 0; i<shRunning.length && !response; i++){
-		if(shRunning[i] == name){
-			response = true;
-		}
+	constructor(){
+		this.shQueue = [];
+		this.shRunning = [];
 	}
-	return response;
-}
 
-addToQueue = function(name, url, data){
-	console.log('addToQueue')
-	shQueue.push({
-		name: name,
-		url: url,
-		data: data
-	})
-}
-
-addToRunning = function(name){
-	console.log('addToRunning')
-	shRunning.push(name);
-}
-
-fetchFromServer = function(name, url, data){
-	console.log('fetchFromServer')
-	return fetch(url, {
-		method: 'GET'
-	})
-}
-
-removeFromRunning = function(name){
-	console.log('removeFromRunning')
-	var response = false;
-	for(var i=0; i<shRunning.length && !response; i++){
-		if(shRunning[i]==name){
-			shRunning.splice(i, 1);
-			response = true
-		}
-	}
-	return response;
-}
-
-inQueue = function(name){
-	console.log('inQueue')
-	var response = false;
-	for(var i = 0; i<shQueue.length && !response; i++){
-		if(shQueue[i].name == name){
-			response = true;
-		}
-	}
-	return response;
-}
-
-callLatest = function(name){
-	console.log('callLatest')
-	var achieved = false;
-	var response = null;
-	for(var i = shQueue.length-1; i >= 0; i--){
-		if(shQueue[i].name==name){
-			if(!achieved){
-				achieved = true;
-				response = shCall(shQueue[i].name, shQueue[i].url, shQueue[i].data);
-				shQueue.splice(i, 1);
-			}else{
-				shQueue.splice(i, 1);
+	isRunning(name){
+		var response = false;
+		for(var i = 0; i<this.shRunning.length && !response; i++){
+			if(this.shRunning[i] == name){
+				response = true;
 			}
 		}
+		return response;
 	}
-	return response;
-}
 
-shCall = function(name, url, data){
-	console.log(shCall)
-	if(isRunning(name)){
-		addToQueue(name, url, data);
-		return new Promise(function(resolve, reject){
-			reject({
-				errorMessage: 'In Queue'
-			})
+	addToQueue(name, url, method, data){
+		this.shQueue.push({
+			name: name,
+			url: url,
+			method: method,
+			data: data
 		})
-	}else{
-		addToRunning(name);
-		return fetchFromServer(name, url, data).then((res)=>{
-			removeFromRunning(name);
-			if(inQueue(name)){
-				return callLatest(name);
-			}else{
-				return res.json();
+	}
+
+	addToRunning(name){
+		this.shRunning.push(name);
+	}
+
+	fetchFromServer(name, url, method, data){
+
+		if(method=='POST'){
+			return fetch(url, {
+				method: 'POST',
+				body: JSON.stringify(data)
+			})
+		}else{
+			return fetch(url, {
+				method: 'GET'
+			})
+		}
+	}
+
+	removeFromRunning(name){
+
+		var response = false;
+		for(var i=0; i<this.shRunning.length && !response; i++){
+			if(this.shRunning[i]==name){
+				this.shRunning.splice(i, 1);
+				response = true
 			}
-		});
+		}
+		return response;
+	}
+
+	inQueue(name){
+
+		var response = false;
+		for(var i = 0; i<this.shQueue.length && !response; i++){
+			if(this.shQueue[i].name == name){
+				response = true;
+			}
+		}
+		return response;
+	}
+
+	callLatest(name){
+
+		var achieved = false;
+		var response = null;
+		for(var i = this.shQueue.length-1; i >= 0; i--){
+			if(this.shQueue[i].name==name){
+				if(!achieved){
+					achieved = true;
+					response = this.hit(this.shQueue[i].name, this.shQueue[i].url, this.shQueue[i].method, this.shQueue[i].data);
+					this.shQueue.splice(i, 1);
+				}else{
+					this.shQueue.splice(i, 1);
+				}
+			}
+		}
+		return response;
+	}
+
+	hit(name, url, method, data){
+
+		if(this.isRunning(name)){
+			this.addToQueue(name, url, method, data);
+			return new Promise(function(resolve, reject){
+				reject({
+					errorMessage: 'In Queue'
+				})
+			})
+		}else{
+			this.addToRunning(name);
+			return this.fetchFromServer(name, url, method, data).then((res)=>{
+				this.removeFromRunning(name);
+				if(this.inQueue(name)){
+					return this.callLatest(name);
+				}else{
+					return res.json();
+				}
+			});
+		}
 	}
 }
+
+export default SmartHitter;
