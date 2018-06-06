@@ -8,17 +8,17 @@ And this module is the result of that.
 
 This module takes smart decisions and returns the data for the latest request only. It achieves that by maintainig a queue (in the form of an array) and check the queue before returning any data.
 
-USAGE:
+**USAGE:**
 
 Simply import the package
 Create a new SmartHitter object
 Use its hit() function to make network requests
 
-THE hit() FUNCTION:
+**THE hit() FUNCTION:**
 
-hit(name, url, method, data)
+>hit(name, url, method, data)
 
-name: unique name of the request (assigned from client side)
-url: url to make the request to
-method: POST / GET
-data: request body
+- name: unique name of the request (assigned from client side)
+- url: url to make the request to
+- method: POST / GET
+- data: request body
