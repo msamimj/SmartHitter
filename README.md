@@ -10,9 +10,9 @@ This module takes smart decisions and returns the data for the latest request on
 
 **USAGE:**
 
-Simply import the package
-Create a new SmartHitter object
-Use its hit() function to make network requests
+1. Simply import the package.
+2. Create a new SmartHitter object.
+4. Use its hit() function to make network requests. Use it instead of using the fetch api directly.
 
 **THE hit() FUNCTION:**
 
